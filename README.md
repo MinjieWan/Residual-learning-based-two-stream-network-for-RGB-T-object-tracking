@@ -1,6 +1,8 @@
 # Residual-learning-based-two-stream-network-for-RGB-T-object-tracking
 This repository contains the codes for paper Residual-learning-based-two-stream-network-for-RGB-T-object-tracking by Yili Chen, Minjie Wan*, Yunkai Xu, et al. (*Corresponding author).
+
 The overall repository style is partially borrowed from MANet (https://github.com/Alexadlu/MANet). Thanks to Chenglong Li.
+
 The relative datasets and evaluation toolkits can be downloded from the following links:
 ## RGBT234 dataset
 Link：https://pan.baidu.com/s/1weaiBh0_yH2BQni5eTxHgg 
