@@ -32,8 +32,8 @@ code：d53m
 * by yourself need install some library functions 
 
 ## Usage
-1. Generate train data using pretrain/prepro_data.py.
-2. Train your own model using pretrain/train.py, the relative parameters can be adjusted in option.py and train.py.
-3. Track with the trained model by running tracking/run_tracker.py, some parameters need to be set in tracking/options.py and track.py.
+1. Generate train data using .../pretrain/prepro_data.py.
+2. Train your own model using .../pretrain/train.py, the relative parameters can be adjusted in option.py and train.py.
+3. Track with the trained model by running .../tracking/run_tracker.py, some parameters need to be set in .../tracking/options.py and track.py.
 
 
