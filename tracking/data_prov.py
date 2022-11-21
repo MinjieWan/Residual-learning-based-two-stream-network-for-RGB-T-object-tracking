@@ -34,7 +34,7 @@ class RegionExtractor():
         else:
             next_pointer = min(self.pointer + self.batch_size, len(self.samples))
             index = self.index[self.pointer:next_pointer]
-            self.pointer = next_pointer#根据batch_size划分样本
+            self.pointer = next_pointer
 
             regions = self.extract_regions(index)
             regions = torch.from_numpy(regions)
@@ -44,8 +44,8 @@ class RegionExtractor():
     def extract_regions(self, index):
         regions = np.zeros((len(index),self.crop_size,self.crop_size,3),dtype='uint8')
         for i, sample in enumerate(self.samples[index]):
-            regions[i] = crop_image(self.image, sample, self.crop_size, self.padding)#图片裁剪
+            regions[i] = crop_image(self.image, sample, self.crop_size, self.padding)
 
-        regions = regions.transpose(0,3,1,2).astype('float32')#transpose 将维度由（0,1,2,3）调整为（0,3,1,2）
+        regions = regions.transpose(0,3,1,2).astype('float32')
         regions = regions - 128.
         return regions
