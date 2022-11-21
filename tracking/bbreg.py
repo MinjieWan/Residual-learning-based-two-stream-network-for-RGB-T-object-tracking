@@ -18,11 +18,11 @@ class BBRegressor():
         bbox = np.copy(bbox)
         gt = np.copy(gt)
         
-        if gt.ndim==1:#判断数组维度
-            gt = gt[None,:]#维度扩展
+        if gt.ndim==1:
+            gt = gt[None,:]
 
         r = overlap_ratio(bbox, gt)
-        s = np.prod(bbox[:,2:], axis=1) / np.prod(gt[0,2:])#prod:指定维度的数组元素连乘，此处计算边框面积
+        s = np.prod(bbox[:,2:], axis=1) / np.prod(gt[0,2:])
         idx = (r >= self.overlap_range[0]) * (r <= self.overlap_range[1]) * \
               (s >= self.scale_range[0]) * (s <= self.scale_range[1])
 
