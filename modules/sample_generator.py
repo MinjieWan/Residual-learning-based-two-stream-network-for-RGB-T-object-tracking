@@ -20,7 +20,7 @@ def gen_samples(generator, bbox, n, overlap_range=None, scale_range=None):
             if overlap_range is not None:
             
                 r = overlap_ratio(samples_, bbox)
-                idx *= (r >= overlap_range[0]) * (r <= overlap_range[1])#判断样本的正负
+                idx *= (r >= overlap_range[0]) * (r <= overlap_range[1])
             if scale_range is not None:
                 s = np.prod(samples_[:,2:], axis=1) / np.prod(bbox[2:])
                 idx *= (s >= scale_range[0]) * (s <= scale_range[1])
@@ -53,8 +53,7 @@ class SampleGenerator():
 
         # (center_x, center_y, w, h)
         sample = np.array([bb[0]+bb[2]/2, bb[1]+bb[3]/2, bb[2], bb[3]], dtype='float32')
-        samples = np.tile(sample[None,:],(n,1))#切片中使用None相当于在对应位置增加一个维度，tile用于将数组在指定维度重复一定次数
-        #（n，1）指在y方向重复n次，即生成n行相同数据
+        samples = np.tile(sample[None,:],(n,1))
 
         # vary aspect ratio
         if self.aspect_f is not None:
@@ -64,7 +63,7 @@ class SampleGenerator():
         # sample generation
         if self.type=='gaussian':
             samples[:,:2] += self.trans_f * np.mean(bb[2:]) * np.clip(0.5*np.random.randn(n,2),-1,1)
-            #clip 将给定数组中的数值不在区间（-1,1）内的置为-1或1
+            
             samples[:,2:] *= self.scale_f ** np.clip(0.5*np.random.randn(n,1),-1,1)
 
         elif self.type=='uniform':
@@ -80,7 +79,7 @@ class SampleGenerator():
             samples[:,2:] *= self.scale_f ** (np.random.rand(n,1)*2-1)
 
         # adjust bbox range
-        samples[:,2:] = np.clip(samples[:,2:], 10, self.img_size-10)#将宽高调整到[10,size-10]区间内
+        samples[:,2:] = np.clip(samples[:,2:], 10, self.img_size-10)
         if self.valid:
             samples[:,:2] = np.clip(samples[:,:2], samples[:,2:]/2, self.img_size-samples[:,2:]/2-1)
         else:
