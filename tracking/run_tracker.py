@@ -22,7 +22,7 @@ from bbreg import *
 from options import *
 from gen_config import *
 
-#样本采集——根据样本裁剪图片（带填充值）——裁剪结果输入网络提取特征——
+
 def forward_samples(model, image1,image2, samples, out_layer='conv3'):
     model.eval()
     extractor1 = RegionExtractor(image1, samples, opts['img_size'], opts['padding'], opts['batch_test'])
@@ -47,7 +47,7 @@ def forward_samples(model, image1,image2, samples, out_layer='conv3'):
 def set_optimizer(model, lr_base, lr_mult=opts['lr_mult'], momentum=opts['momentum'], w_decay=opts['w_decay']):
     params = model.get_learnable_params()
     param_list = []
-    for k, p in params.items():#iteritems 返回一个字典列表操作后的達代器，[（索引，内容），（）。。。]
+    for k, p in params.items():
         lr = lr_base
         for l, m in lr_mult.items():
             if k.startswith(l):
@@ -90,9 +90,9 @@ def train(model, criterion, optimizer, pos_feats, neg_feats, maxiter, in_layer='
 
         # create batch
         batch_pos_feats = Variable(pos_feats.index_select(0, pos_cur_idx))
-        batch_neg_feats = Variable(neg_feats.index_select(0, neg_cur_idx))#取相应序号的特征值
+        batch_neg_feats = Variable(neg_feats.index_select(0, neg_cur_idx))
 
-        # hard negative mining 难例挖掘，寻找得分较高的负样本
+       
         if batch_neg_cand > batch_neg:
             model.eval()
             for start in range(0,batch_neg_cand,batch_test):
@@ -103,8 +103,8 @@ def train(model, criterion, optimizer, pos_feats, neg_feats, maxiter, in_layer='
                 else:
                     neg_cand_score = torch.cat((neg_cand_score, score.data[:,1].clone()),0)
 
-            _, top_idx = neg_cand_score.topk(batch_neg)#求其中的最大值并返回索引
-            batch_neg_feats = batch_neg_feats.index_select(0, Variable(top_idx))#取得分最高的负样本
+            _, top_idx = neg_cand_score.topk(batch_neg)
+            batch_neg_feats = batch_neg_feats.index_select(0, Variable(top_idx))
             model.train()
         
         # forward
@@ -115,7 +115,7 @@ def train(model, criterion, optimizer, pos_feats, neg_feats, maxiter, in_layer='
         loss = criterion(pos_score, neg_score)
         model.zero_grad()
         loss.backward()
-        torch.nn.utils.clip_grad_norm(model.parameters(), opts['grad_clip'])#防止梯度爆炸
+        torch.nn.utils.clip_grad_norm(model.parameters(), opts['grad_clip'])
         optimizer.step()
 
 def run_mdnet(img_list1,img_list2, init_bbox, gt=None, savefig_dir='', display=False):
@@ -131,7 +131,7 @@ def run_mdnet(img_list1,img_list2, init_bbox, gt=None, savefig_dir='', display=F
     model = MDNet(opts['model_path1'])
     if opts['use_gpu']:
         model = model.cuda()
-    model.set_learnable_params(opts['ft_layers'])#仅学习更新fc层的参数
+    model.set_learnable_params(opts['ft_layers'])
     
     # Init criterion and optimizer 
     criterion = BinaryLoss()
@@ -225,13 +225,13 @@ def run_mdnet(img_list1,img_list2, init_bbox, gt=None, savefig_dir='', display=F
         # Estimate target bbox
         samples = gen_samples(sample_generator, target_bbox, opts['n_samples'])
         sample_scores = forward_samples(model, image1, image2,samples, out_layer='fc6')
-        top_scores, top_idx = sample_scores[:,1].topk(5)#得到前5个大的数据
+        top_scores, top_idx = sample_scores[:,1].topk(5)
         top_idx = top_idx.cpu().numpy()
         target_score = top_scores.mean()
         target_bbox = samples[top_idx].mean(axis=0)
 
         success = target_score > opts['success_thr']
-        #成功则缩小搜索区域，并利用搜索结果进行下一帧正负样本的采集和特征提取，失败则扩大搜索区域，继续对模型进行训练更新.
+        
         # Expand search area at failure
         if success:
             count=0
@@ -284,8 +284,8 @@ def run_mdnet(img_list1,img_list2, init_bbox, gt=None, savefig_dir='', display=F
         # Short term update
         if not success:
             nframes = min(opts['n_frames_short'],len(pos_feats_all))
-            pos_data = torch.stack(pos_feats_all[-nframes:],0).view(-1,feat_dim)#-1表示该位置的参数可由其它参数推断，所有参
-            # 数的实际值乘积应为tensor中元素的总个数
+            pos_data = torch.stack(pos_feats_all[-nframes:],0).view(-1,feat_dim)
+            
             neg_data = torch.stack(neg_feats_all,0).view(-1,feat_dim)
             train(model, criterion, update_optimizer, pos_data, neg_data, opts['maxiter_update'])
         
