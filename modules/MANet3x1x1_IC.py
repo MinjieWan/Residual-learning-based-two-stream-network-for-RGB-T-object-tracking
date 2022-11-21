@@ -204,7 +204,7 @@ class MDNet(nn.Module):
                 ('fc5',   nn.Sequential(nn.Dropout(0.5),
                                         nn.Linear(512, 512),
                                         nn.ReLU()))]))
-        # 这一步是在fc5后建立多个分支全连接层，每个视频有不同的全连接层
+        # different FC layers for different sequences.
         self.branches = nn.ModuleList([nn.Sequential(nn.Dropout(0.5), 
                                                      nn.Linear(512, 2)) for _ in range(K)])
         
@@ -224,7 +224,7 @@ class MDNet(nn.Module):
       
         #**********************RGB*************************************
         for name, module in self.RGB_para1_3x3.named_children():
-            #返回子模块的達代器，例如此处为：Rconv1,网络结构
+            
             append_params(self.params, module, name)
 
         for name, module in self.RGB_para2_1x1.named_children():
@@ -276,7 +276,7 @@ class MDNet(nn.Module):
                 p.requires_grad = False
  
     def get_learnable_params(self):
-        params = OrderedDict()#有序字典，一般的字典数据排列是无序的
+        params = OrderedDict()
         for k, p in self.params.iteritems():
             if p.requires_grad:
                 params[k] = p
@@ -332,8 +332,7 @@ class MDNet(nn.Module):
                     feat=torch.cat((featR3,featT3),1)   #train 1:1   #test 1:1.4
                     # featT3 = torch.cat((featT3, featT3), 1)
                     # featR3 = torch.cat((featR3, featR3), 1)
-                    feat = feat.view(feat.size(0),-1)#将前面操作输出的多维度的tensor展平成一维，然后输入分类器，-1是自适应分配，
-                    # 指在不知道函数有多少列的情况下，根据原tensor数据自动分配列数。
+                    feat = feat.view(feat.size(0),-1)
                     # featT3 = featT3.view(featT3.size(0), -1)
                     # featR3 = featR3.view(featR3.size(0), -1)
                 if name=='fc4':
@@ -365,7 +364,7 @@ class MDNet(nn.Module):
     def load_model(self, model_path):
         states = torch.load(model_path)
         shared_layers = states['shared_layers']
-        self.layers.load_state_dict(shared_layers)#读取共享层参数
+        self.layers.load_state_dict(shared_layers)
 
         
         para1_layers=states['RGB_para1_3x3']
@@ -381,7 +380,7 @@ class MDNet(nn.Module):
         para2_layers=states['T_para2_1x1']
         self.T_para2_1x1.load_state_dict(para2_layers,strict=True)
         para3_layers=states['T_para3_1x1']
-        self.T_para3_1x1.load_state_dict(para3_layers,strict=True)#读取模态特定层参数
+        self.T_para3_1x1.load_state_dict(para3_layers,strict=True)
 
        
         
